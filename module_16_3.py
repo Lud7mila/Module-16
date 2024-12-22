@@ -1,6 +1,7 @@
 # Задача "Имитация работы с БД"
 
 from fastapi import FastAPI, Path, HTTPException
+from typing import Annotated
 
 app = FastAPI()
 
@@ -12,15 +13,15 @@ async def get_all_messages() -> dict:
     return users
 
 @app.get('/user/{user_id}')
-async def get_user(user_id: int = Path(ge=1, le=100, description="Enter User ID", example=1)) -> str:
+async def get_user(user_id: Annotated[int, Path(ge=1, le=100, description="Enter User ID", example=1)]) -> str:
     if users.get(str(user_id)):
         return users.get(str(user_id))
     raise HTTPException(status_code=404, detail=f"Пользователь {user_id} не найден")
 
 # создание новой задачи
 @app.post('/user/{username}/{age}')
-async def create_user(username: str = Path(min_length=5, max_length=20, description="Enter username", example='UrbanUser'),
-                      age: int = Path(ge=18, le=120, description="Enter age", example=24)) -> str:
+async def create_user(username: Annotated[str, Path(min_length=5, max_length=20, description="Enter username", example='UrbanUser')],
+                      age: Annotated[int, Path(ge=18, le=120, description="Enter age", example=24)]) -> str:
     user_id = '1'
     if users:
         user_id = str(int(max(users, key=int)) + 1)
@@ -29,9 +30,9 @@ async def create_user(username: str = Path(min_length=5, max_length=20, descript
 
 # обновление данных
 @app.put('/user/{user_id}/{username}/{age}')
-async def update_user(user_id: int  = Path(ge=1, le=100, description="Enter User ID", example=1),
-                      username: str = Path(min_length=5, max_length=20, description="Enter username", example='NewUser'),
-                      age: int = Path(ge=18, le=120, description="Enter age", example=24)) -> str:
+async def update_user(user_id: Annotated[int, Path(ge=1, le=100, description="Enter User ID", example=1)],
+                      username: Annotated[str, Path(min_length=5, max_length=20, description="Enter username", example='NewUser')],
+                      age: Annotated[int, Path(ge=18, le=120, description="Enter age", example=24)]) -> str:
     if users.get(str(user_id)):
         users[str(user_id)] = f"Имя: {username}, " + f"возраст: {age}"
         return f"The user {user_id} has been updated"
@@ -39,7 +40,7 @@ async def update_user(user_id: int  = Path(ge=1, le=100, description="Enter User
 
 # запрос на удаление конкретного сообщения
 @app.delete('/user/{user_id}')
-async def delete_user(user_id: int = Path(ge=1, le=100, description="Enter User ID", example=1)) -> str:
+async def delete_user(user_id: Annotated[int, Path(ge=1, le=100, description="Enter User ID", example=1)]) -> str:
     if users.get(str(user_id)):
         users.pop(str(user_id))
         return f"User {user_id} has been deleted."
